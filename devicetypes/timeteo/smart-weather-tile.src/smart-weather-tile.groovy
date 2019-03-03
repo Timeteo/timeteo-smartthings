@@ -17,7 +17,7 @@
  *  Date: 2013-04-30
  */
 metadata {
-    definition (name: "SmartWeather Station Tile 3.0", namespace: "timeteo", author: "Timeteo") {
+    definition (name: "SmartWeather Station Tile", namespace: "timeteo", author: "Timeteo") {
         capability "Illuminance Measurement"
         capability "Temperature Measurement"
         capability "Relative Humidity Measurement"
