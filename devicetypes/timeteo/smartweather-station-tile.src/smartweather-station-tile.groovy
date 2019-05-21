@@ -140,7 +140,7 @@ metadata {
         }
 
         valueTile("percentPrecip", "device.percentPrecip", decoration: "flat", height: 1, width: 2) {
-            state "default", label:'${currentValue}% precipitation\nchance'
+            state "default", label:'${currentValue}% chance of\nprecipitation'
         }
 
         valueTile("rise", "device.localSunrise", decoration: "flat", height: 1, width: 2) {
