@@ -41,6 +41,7 @@ metadata {
         attribute "sunriseDate", "string"
         attribute "sunsetDate", "string"
         attribute "lastUpdate", "string"
+        attribute "ultravioletIndex", "string"
         attribute "uvDescription", "string"
         attribute "forecastToday", "string"
         attribute "forecastTonight", "string"
@@ -48,7 +49,7 @@ metadata {
     }
 
     preferences {
-        input "zipCode", "text", title: "Zip Code (optional)", required: false
+        input "zipCode", "text", title: "Zip Code (required)", required: true
         input "stationId", "text", title: "Personal Weather Station ID (optional)", required: false
     }
 
@@ -139,55 +140,61 @@ metadata {
         }
 
         valueTile("percentPrecip", "device.percentPrecip", decoration: "flat", height: 1, width: 2) {
-            state "default", label:'${currentValue}% precip'
-        }
-
-        valueTile("ultravioletIndex", "device.uvDescription", decoration: "flat", height: 1, width: 2) {
-            state "default", label:'UV ${currentValue}'
-        }
-
-        valueTile("alert", "device.alert", decoration: "flat", height: 2, width: 6) {
-            state "default", label:'${currentValue}'
-        }
-
-        standardTile("refresh", "device.weather", decoration: "flat", height: 1, width: 2) {
-            state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
+            state "default", label:'${currentValue}% precipitation\nchance'
         }
 
         valueTile("rise", "device.localSunrise", decoration: "flat", height: 1, width: 2) {
             state "default", label:'Sunrise ${currentValue}'
         }
 
+        valueTile("ultravioletIndex", "device.ultravioletIndex", decoration: "flat", height: 1, width: 2) {
+            state "default", label:'UV Index ${currentValue}'
+        }
+
+        valueTile("alert", "device.alert", decoration: "flat", height: 2, width: 6) {
+            state "default", label:'${currentValue}'
+        }
+
+        standardTile("refresh", "device.weather", decoration: "flat", height: 1, width: 3) {
+            state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
+        }
+
         valueTile("set", "device.localSunset", decoration: "flat", height: 1, width: 2) {
             state "default", label:'Sunset ${currentValue}'
+        }
+
+        valueTile("ultravioletDescription", "device.uvDescription", decoration: "flat", height: 1, width: 2) {
+            state "default", label:'UV ${currentValue}'
         }
 
         valueTile("light", "device.illuminance", decoration: "flat", height: 1, width: 2) {
             state "default", label:'${currentValue} lux'
         }
 
-        valueTile("today", "device.forecastToday", decoration: "flat", height: 1, width: 3) {
+        valueTile("today", "device.forecastToday", decoration: "flat", height: 2, width: 2) {
             state "default", label:'Today:\n${currentValue}'
         }
 
-        valueTile("tonight", "device.forecastTonight", decoration: "flat", height: 1, width: 3) {
+        valueTile("tonight", "device.forecastTonight", decoration: "flat", height: 2, width: 2) {
             state "default", label:'Tonight:\n${currentValue}'
         }
 
-        valueTile("tomorrow", "device.forecastTomorrow", decoration: "flat", height: 1, width: 3) {
+        valueTile("tomorrow", "device.forecastTomorrow", decoration: "flat", height: 2, width: 2) {
             state "default", label:'Tomorrow:\n${currentValue}'
         }
 
-        valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", height: 1, width: 3) {
+        valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", height: 2, width: 3) {
             state "default", label:'Last update:\n${currentValue}'
         }
 
         main(["temperature", "weatherIcon","feelsLike"])
-        details(["temperature", "feelsLike", "weatherIcon", "humidity", "wind",
-                 "weather", "city", "percentPrecip", "ultravioletIndex", "light",
-                 "rise", "set",
-                 "refresh",
-                 "today", "tonight", "tomorrow", "lastUpdate",
+        details(["temperature", "feelsLike", "weatherIcon",
+				 "humidity",
+				 "wind", "weather", "city",
+				 "percentPrecip", "rise", "ultravioletIndex",
+				 "light", "set", "ultravioletDescription",
+                 "today", "tonight", "tomorrow", 
+				 "lastUpdate", "refresh",
                  "alert"])}
 }
 
@@ -207,22 +214,30 @@ def uninstalled() {
 
 // handle commands
 def poll() {
-    log.info "WUSTATION: Executing 'poll', location: ${location.name}"
+    def zipCode = "92563"
+    def stationId = "PWS:KCAMURRI59"
+    log.info "Zip: ${zipCode}"
+    log.info "Station: ${stationId}"
+	log.info "WUSTATION: Executing 'poll', location: ${location.name}"
     if (zipCode && zipCode.toUpperCase().startsWith('PWS:')) {
         log.debug zipCode.substring(4)
         pollUsingPwsId(zipCode.substring(4).toUpperCase())
-    log.info "WUSTATION: Executing Zip code 'poll'"
+		log.info "WUSTATION: Executing PWS 'poll'"
 
-} else {
+	} else {
         pollUsingZipCode(zipCode.toUpperCase())
-    log.info "WUSTATION: Executing Zip code 'poll'"
+		log.info "WUSTATION: Executing Zip code 'poll'"
 
-}
-    if (stationId) {
-        pollUsingPwsId(stationId.toUpperCase())
-    log.info "WUSTATION: Executing PWS 'poll'"
+	}
+	
+    if (stationId && stationId.toUpperCase().startsWith('PWS:')) {
+        pollUsingPwsId(stationId.substring(4).toUpperCase())
+		log.info "WUSTATION: Executing PWS 'poll'"
 
-}
+	} else {
+        pollUsingPwsId(stationId)
+		log.info "WUSTATION: Executing PWS 'poll'"
+	}
 }
 
 def pollUsingZipCode(String zipCode) {
@@ -315,7 +330,8 @@ def pollUsingZipCode(String zipCode) {
 }
 
 def pollUsingPwsId(String stationId) {
-    // Last update time stamp
+    log.info "WUSTATION: Executing PWS Update"
+	// Last update time stamp
     def timeZone = location.timeZone ?: timeZone(timeOfDay)
     def timeStamp = new Date().format("yyyy MMM dd EEE h:mm:ss a", location.timeZone)
     sendEvent(name: "lastUpdate", value: timeStamp)
@@ -331,8 +347,6 @@ def pollUsingPwsId(String stationId) {
         send(name: "feelsLike", value: convertTemperature(obs[dataScale].windChill, dataScale, tempUnits), unit: tempUnits)
 
         send(name: "humidity", value: obs.humidity, unit: "%")
-        //send(name: "weather", value: "n/a")
-        //send(name: "weatherIcon", value: null as String, displayed: false)
         send(name: "wind", value: convertWindSpeed(obs[dataScale].windSpeed, dataScale, tempUnits) as String, unit: windUnits) // as String because of bug in determining state change of 0 numbers
         send(name: "windVector", value: "${obs.winddir}° ${convertWindSpeed(obs[dataScale].windSpeed, dataScale, tempUnits)} ${windUnits}")
         def cityValue = obs.neighborhood
@@ -340,9 +354,17 @@ def pollUsingPwsId(String stationId) {
             send(name: "city", value: cityValue, isStateChange: true)
         }
 
-        send(name: "ultravioletIndex", value: obs.uv)
-        //send(name: "uvDescription", value: "n/a")
-
+        def uv = obs.uvIndex
+		if (uv) {
+		    log.info "WUSTATION: PWS ultravioletIndex"
+			send(name: "ultravioletIndex", value: obs.uvIndex)
+			def uvDesc = obs.uvDescription
+			if (obs.uvDescription) {
+				send(name: "uvDescription", value: obs.uvDescription)
+			} else {
+				send(name: "uvDescription", value: "N/A")
+			}
+		}
 
         // Alerts
         def alerts = getTwcAlerts("${obs.lat},${obs.lon}")
