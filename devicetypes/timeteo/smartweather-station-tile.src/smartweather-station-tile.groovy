@@ -183,7 +183,7 @@ metadata {
             state "default", label:'Tomorrow:\n${currentValue}'
         }
 
-        valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", height: 2, width: 3) {
+        valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", height: 1, width: 3) {
             state "default", label:'Last update:\n${currentValue}'
         }
 
