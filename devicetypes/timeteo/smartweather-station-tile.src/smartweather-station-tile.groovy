@@ -214,8 +214,6 @@ def uninstalled() {
 
 // handle commands
 def poll() {
-    def zipCode = "92563"
-    def stationId = "PWS:KCAMURRI59"
     log.info "Zip: ${zipCode}"
     log.info "Station: ${stationId}"
 	log.info "WUSTATION: Executing 'poll', location: ${location.name}"
@@ -443,7 +441,7 @@ private estimateLux(obs, sunriseDate, sunsetDate) {
     else {
         //day
         switch(obs.iconCode) {
-            case '4':
+            case 4:
                 lux = 200
                 break
             case [5,6,7,8,9,10,
