@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  */
 
-private getRootUrl()		{ "https://mylink2o.com" }
+private getRootUrl()		{ "https://calc.mylink2o.com" }
 private getAuthUri()		{ "/api/user/login" }
 private getRelayStartUri()	{ "/api/relay/start" }
 private getRelayStopUri()	{ "/api/relay/stop" }
