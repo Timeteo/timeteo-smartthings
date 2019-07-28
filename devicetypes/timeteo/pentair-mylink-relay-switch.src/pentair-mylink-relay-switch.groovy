@@ -25,7 +25,7 @@ private getRelayStatusUri()	{ "/api/relay/status" }
 
 
 metadata {
-	definition (name: "Pentair Link2O Relay Switch", namespace: "Timeteo", author: "Tim Raymond", cstHandler: true) {
+	definition (name: "Pentair Mylink Relay Switch", namespace: "Timeteo", author: "Tim Raymond", cstHandler: true) {
 		capability "Switch"
 		capability "Refresh"
 	}
