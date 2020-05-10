@@ -27,6 +27,8 @@ metadata {
 		capability "Temperature Measurement"
 		capability "Sensor"
 		capability "Refresh"
+
+		attribute "lastUpdate", "string"
 	}
 
 	// simulator metadata
@@ -57,12 +59,16 @@ tiles(scale: 2) {
 				}
 		}
 
-		standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+		valueTile("lastUpdate", "device.lastUpdate", decoration: "flat", height: 2, width: 3) {
+            state "default", label:'Last update:\n${currentValue}'
+        }
+        
+		valueTile("refresh", "device.refresh", decoration: "flat",  height: 2, width: 3) {
 			state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
 
 		main "temperature"
-		details(["temperature","refresh"])
+		details(["temperature","lastUpdate","refresh"])
 	}
 }
 
@@ -81,7 +87,6 @@ def parse(String description) {
 
 def installed() {
     poll()
-    runEvery30Minutes(poll)
 }
 
 def updated() {
@@ -94,6 +99,10 @@ def uninstalled() {
 // self-explanatory
 def poll() {
 	log.debug "Executing: poll"
+    // Last update time stamp
+    def timeZone = location.timeZone ?: timeZone(timeOfDay)
+    def timeStamp = new Date().format("MMM dd yyyy EEE h:mm:ss a", location.timeZone)
+    sendEvent(name: "lastUpdate", value: timeStamp)
     getStatus()
 }
 
